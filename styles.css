@@ -1,0 +1,44 @@
+.yaps-setting-description {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  line-height: var(--line-height-tight);
+}
+
+.yaps-status-bar {
+  align-items: center;
+  cursor: pointer;
+  display: inline-flex;
+  gap: var(--size-2-1);
+}
+
+.yaps-status-bar-hidden {
+  display: none;
+}
+
+.yaps-status-icon {
+  align-items: center;
+  display: inline-flex;
+}
+
+.yaps-status-icon svg {
+  height: 13px;
+  width: 13px;
+}
+
+.yaps-search-title {
+  color: var(--text-normal);
+  font-weight: var(--font-semibold);
+}
+
+.yaps-search-path {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  margin-top: var(--size-2-1);
+}
+
+.yaps-search-snippet {
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  line-height: var(--line-height-tight);
+  margin-top: var(--size-2-1);
+}

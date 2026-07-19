@@ -1,0 +1,42 @@
+{
+  "name": "yaps-obsidian",
+  "version": "1.0.0",
+  "description": "Official Yaps integration for Obsidian.",
+  "main": "main.js",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc --noEmit --skipLibCheck && node esbuild.config.mjs production",
+    "dev": "node esbuild.config.mjs",
+    "lint": "eslint src tests",
+    "test": "bun test",
+    "check": "bun run test && bun run lint && bun run build",
+    "package": "bun run check && node scripts/package-release.mjs"
+  },
+  "keywords": [
+    "obsidian",
+    "dictation",
+    "voice",
+    "local-first",
+    "notes"
+  ],
+  "license": "MIT",
+  "homepage": "https://yaps.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/richawo/yaps-obsidian.git"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@types/bun": "^1.3.14",
+    "@types/node": "^22.15.17",
+    "esbuild": "0.25.5",
+    "eslint": "^9.39.4",
+    "eslint-plugin-obsidianmd": "^0.4.0",
+    "globals": "^17.6.0",
+    "jiti": "^2.6.1",
+    "obsidian": "latest",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.59.1"
+  }
+}
