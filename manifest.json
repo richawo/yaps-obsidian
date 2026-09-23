@@ -1,11 +1,10 @@
 {
   "id": "yaps",
   "name": "Yaps",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "minAppVersion": "1.5.0",
   "description": "Dictate into notes and search your private local Markdown vault with Yaps.",
   "author": "Yaps",
   "authorUrl": "https://yaps.ai",
-  "fundingUrl": "https://yaps.ai",
   "isDesktopOnly": true
 }

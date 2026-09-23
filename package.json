@@ -1,6 +1,6 @@
 {
   "name": "yaps-obsidian",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Official Yaps integration for Obsidian.",
   "main": "main.js",
   "type": "module",
