@@ -8,7 +8,7 @@ Yaps
 
 Dictate into notes and search your private local Markdown vault with Yaps.
 
-## Reviewer summary
+## Submission summary
 
 Yaps for Obsidian is a desktop-only companion for the separately installed Yaps app. It focuses the current Markdown editor for global Yaps dictation, displays the user's configured shortcut, searches the active local vault, captures selected text as a new local note, and opens a Yaps-compatible daily note.
 
@@ -18,7 +18,7 @@ The plugin has no analytics, remote API client, microphone capture, embedded mod
 
 ### Short
 
-Your voice, directly in Obsidian—cleaned up by Yaps, with private local-vault search built in.
+Your voice, directly in Obsidian, cleaned up by Yaps, with private local-vault search built in.
 
 ### Long
 
