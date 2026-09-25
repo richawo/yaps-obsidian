@@ -47,6 +47,7 @@ Yaps cleans the transcript and pastes it at the live cursor. You can assign Obsi
 ## Privacy and safety
 
 - Commands invoke the installed Yaps CLI directly with an argument array; no shell is used. Discovery honors the optional configured path, then `YAPS_CLI_BINARY`, `PATH`, and verified app locations, and accepts a candidate only after bounded probes and a harmless `status` check.
+- Automatic discovery keeps looking past an unverifiable PATH wrapper for a supported installed helper. Explicit path overrides keep their existing account safety checks.
 - The plugin follows the desktop app's canonical settings and reuses its signed-in trial or Yaps Pro automatically. Healthy, signed-out, expired, and mobile-only checks never wake the app or request credentials. Only a signed-in cache that temporarily cannot verify access may quietly open the exact verified standard app and retry for a few bounded seconds. **Prepare editor for dictation** can also open that exact app when its user-controlled setting is enabled. There is no separate Obsidian sign-in or Connect button.
 - Setapp's Yaps build does not yet expose the same verified CLI/account contract. Automatic Obsidian integration for that distribution requires a future Yaps app update; the plugin does not scan for or launch it by name.
 - Every vault operation is explicitly rooted to the active Obsidian vault.

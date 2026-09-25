@@ -2,6 +2,7 @@
 
 ## 1.0.2
 
+- Continue automatic discovery past an unverifiable PATH wrapper when a supported installed helper is available. Explicit path overrides retain their account safety checks.
 - Discover the installed Yaps CLI automatically from overrides, `PATH`, and documented app locations with bounded validation.
 - Reuse the desktop settings path and active signed-in trial or Yaps Pro without a separate Obsidian connection.
 - Refuse credential-based account checks from Yaps versions older than 2.3.124 and provide specific, private recovery guidance.

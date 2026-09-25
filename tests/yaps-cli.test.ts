@@ -168,9 +168,33 @@ describe("YapsCli response contracts", () => {
     await symlink(fixture.executable, wrapper);
     process.env.PATH = pathDirectory;
     delete process.env.YAPS_CLI_BINARY;
-    const cli = new YapsCli({ vaultRoot: fixture.vault });
+    const cli = new YapsCli({
+      credentialFreeAuthStatus: async () => true,
+      vaultRoot: fixture.vault,
+    });
 
     expect(await cli.resolveCliPath()).toBe(wrapper);
+  });
+
+  test("continues past an unverifiable PATH wrapper to a supported helper", async () => {
+    const wrapperFixture = await createFixtureCli();
+    const helperFixture = await createFixtureCli();
+    const directory = await temporaryDirectory("yaps-obsidian-path-fallback-");
+    const wrapper = join(directory, "yaps");
+    const helper = join(directory, "yaps_cli");
+    await symlink(wrapperFixture.executable, wrapper);
+    await symlink(helperFixture.executable, helper);
+    process.env.PATH = directory;
+    delete process.env.YAPS_CLI_BINARY;
+    const cli = new YapsCli({
+      credentialFreeAuthStatus: async (path) => path === helper ? "safe" : "unverified",
+      vaultRoot: helperFixture.vault,
+    });
+
+    expect((await cli.status()).note_count).toBe(0);
+    expect(await cli.resolveCliPath()).toBe(helper);
+    expect(await readFile(wrapperFixture.authInvocation, "utf8").catch(() => null)).toBeNull();
+    expect(await readFile(helperFixture.authInvocation, "utf8")).toContain("auth status");
   });
 
   test("stops after the configured discovery probe limit", async () => {
@@ -192,13 +216,33 @@ describe("YapsCli response contracts", () => {
     expect(await readFile(validInvocation, "utf8").catch(() => null)).toBeNull();
   });
 
+  test("bounds discovery when account-safety metadata never settles", async () => {
+    const fixture = await createFixtureCli();
+    const directory = await temporaryDirectory("yaps-obsidian-metadata-deadline-");
+    const wrapper = join(directory, "yaps");
+    await symlink(fixture.executable, wrapper);
+    process.env.PATH = directory;
+    delete process.env.YAPS_CLI_BINARY;
+    const cli = new YapsCli({
+      credentialFreeAuthStatus: () => new Promise(() => {}),
+      discoveryTimeoutMs: 800,
+      maxDiscoveryProbes: 1,
+      vaultRoot: fixture.vault,
+    });
+    const started = Date.now();
+
+    expect(await cli.resolveCliPath()).toBe(wrapper);
+    expect(Date.now() - started).toBeLessThan(2_000);
+    expect(await readFile(fixture.authInvocation, "utf8").catch(() => null)).toBeNull();
+  });
+
   test("rejects a Setapp bundle reached through a PATH symlink without running auth status", async () => {
     const fixture = await createFixtureCli({ layout: "setapp" });
     const pathDirectory = await temporaryDirectory("yaps-obsidian-setapp-path-");
     await symlink(fixture.executable, join(pathDirectory, "yaps"));
     process.env.PATH = pathDirectory;
     delete process.env.YAPS_CLI_BINARY;
-    const cli = new YapsCli({ vaultRoot: fixture.vault });
+    const cli = new YapsCli({ maxDiscoveryProbes: 1, vaultRoot: fixture.vault });
 
     expect((await captureError(cli.status())).message).toMatch(/could not verify that its account check is credential-free/);
     expect(await readFile(fixture.authInvocation, "utf8").catch(() => null)).toBeNull();

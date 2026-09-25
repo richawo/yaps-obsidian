@@ -3,6 +3,7 @@ import { constants } from "node:fs";
 import { access, mkdtemp, open, realpath, rm, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { basename, delimiter, dirname, isAbsolute, join, resolve, sep, win32 } from "node:path";
+import { clearTimeout as clearDeadline, setTimeout as setDeadline } from "node:timers";
 import { promisify } from "node:util";
 import { mergeSearchHits, normalizedFolder } from "./format";
 import type {
@@ -179,15 +180,27 @@ export class YapsCli {
 
     const deadline = Date.now() + (this.options.discoveryTimeoutMs ?? CLI_DISCOVERY_TOTAL_TIMEOUT_MS);
     let probes = 0;
+    let unverifiedFallback: string | undefined;
     for (const candidate of candidates) {
       if (Date.now() >= deadline || probes >= (this.options.maxDiscoveryProbes ?? MAX_CLI_DISCOVERY_PROBES)) break;
       const resolvedCandidate = await resolveCliCandidate(candidate);
       if (!resolvedCandidate) continue;
       probes += 1;
       if (await isValidatedYapsCli(resolvedCandidate, Math.min(CLI_DISCOVERY_TIMEOUT_MS, Math.max(1, deadline - Date.now())))) {
-        this.cachedCliPath = resolvedCandidate;
-        return resolvedCandidate;
+        const credentialFree = this.options.credentialFreeAuthStatus ?? supportsCredentialFreeAuthStatus;
+        const safety = await settleBeforeDeadline(credentialFree(resolvedCandidate), deadline);
+        if (safety === true || safety === "safe") {
+          this.cachedCliPath = resolvedCandidate;
+          return resolvedCandidate;
+        }
+        // Retain the account diagnostic if no supported helper is available,
+        // but do not let a PATH wrapper hide a verified installed helper.
+        unverifiedFallback ??= resolvedCandidate;
       }
+    }
+    if (unverifiedFallback) {
+      this.cachedCliPath = unverifiedFallback;
+      return unverifiedFallback;
     }
     throw new YapsCliNotFoundError();
   }
@@ -305,6 +318,22 @@ export class YapsCli {
     return { auth, authStatusSafety, settingsPath };
   }
 
+}
+
+async function settleBeforeDeadline<T>(operation: Promise<T>, deadline: number): Promise<T | undefined> {
+  let timer: ReturnType<typeof setDeadline> | undefined;
+  try {
+    return await Promise.race([
+      operation,
+      new Promise<undefined>((resolve) => {
+        timer = setDeadline(() => resolve(undefined), Math.max(1, deadline - Date.now()));
+      }),
+    ]);
+  } catch {
+    return undefined;
+  } finally {
+    if (timer !== undefined) clearDeadline(timer);
+  }
 }
 
 function parsedVersion(value: string | undefined): number[] | undefined {
